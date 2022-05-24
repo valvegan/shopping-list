@@ -12,21 +12,15 @@ import {
 import { useState, useEffect, useCallback } from "react";
 //using db reference
 import { db, Auth } from "./firebase/firebase-config";
-import {
-  doc,
-  addDoc,
-  setDoc,
-  collection,
-  onSnapshot,
-  query,
-  orderBy,
-  where,
-} from "firebase/firestore";
+import { addDoc, collection, onSnapshot } from "firebase/firestore";
 import { signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 
 export default function App() {
   const [list, setList] = useState([]);
   const [loggedUser, setLoggedUser] = useState([]);
+  const [text, setText] = useState("")
 
   const anonLogin = async () => {
     try {
@@ -107,6 +101,26 @@ export default function App() {
       .catch((e) => console.log(e.message));
   };
 
+  const saveName = async()=>{
+    try{
+      AsyncStorage.setItem("appdata", text)
+    }catch(e){
+      console.log(e)
+    }
+  }
+
+  const getName = async ()=>{
+    try{
+      const name = await AsyncStorage.getItem("appdata");
+      setText(name)
+    }catch(e){
+      console.log(e)
+    }
+  }
+
+  useEffect(()=>{
+getName()
+  }, [])
   return (
     <View style={styles.container}>
       <Button title="create new doc" onPress={addItem}></Button>
@@ -129,6 +143,11 @@ export default function App() {
       {!loggedUser && (
         <Text>No collections here, login to start adding some </Text>
       )}
+<View><TextInput placeholder="heyu"
+onChangeText={value=> setText(value)}></TextInput></View>
+<Button title="save name" onPress={saveName}></Button>
+<Text>Name: {text}</Text>
+      
     </View>
   );
 }
